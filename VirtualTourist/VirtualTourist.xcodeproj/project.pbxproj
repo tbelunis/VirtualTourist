@@ -11,6 +11,8 @@
 		E20D3BA31B5E82F100A0090B /* Pin.swift in Sources */ = {isa = PBXBuildFile; fileRef = E20D3BA21B5E82F100A0090B /* Pin.swift */; };
 		E20D3BA51B5E82F200A0090B /* Photo.swift in Sources */ = {isa = PBXBuildFile; fileRef = E20D3BA41B5E82F200A0090B /* Photo.swift */; };
 		E20D3BA71B5E83C600A0090B /* Constants.swift in Sources */ = {isa = PBXBuildFile; fileRef = E20D3BA61B5E83C600A0090B /* Constants.swift */; };
+		E24FEB271BA60612009B40A7 /* VTAnnotation.swift in Sources */ = {isa = PBXBuildFile; fileRef = E24FEB261BA60612009B40A7 /* VTAnnotation.swift */; };
+		E24FEB291BA60DFB009B40A7 /* CoreDataStackManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = E24FEB281BA60DFB009B40A7 /* CoreDataStackManager.swift */; };
 		E2F995BF1B50435400BFB722 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = E2F995BE1B50435400BFB722 /* AppDelegate.swift */; };
 		E2F995C21B50435400BFB722 /* VirtualTourist.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = E2F995C01B50435400BFB722 /* VirtualTourist.xcdatamodeld */; };
 		E2F995C41B50435400BFB722 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = E2F995C31B50435400BFB722 /* ViewController.swift */; };
@@ -36,6 +38,8 @@
 		E20D3BA21B5E82F100A0090B /* Pin.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Pin.swift; sourceTree = "<group>"; };
 		E20D3BA41B5E82F200A0090B /* Photo.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Photo.swift; sourceTree = "<group>"; };
 		E20D3BA61B5E83C600A0090B /* Constants.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Constants.swift; sourceTree = "<group>"; };
+		E24FEB261BA60612009B40A7 /* VTAnnotation.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = VTAnnotation.swift; sourceTree = "<group>"; };
+		E24FEB281BA60DFB009B40A7 /* CoreDataStackManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CoreDataStackManager.swift; sourceTree = "<group>"; };
 		E2F995B91B50435400BFB722 /* VirtualTourist.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = VirtualTourist.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		E2F995BD1B50435400BFB722 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		E2F995BE1B50435400BFB722 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
@@ -80,6 +84,7 @@
 		E20D3B9E1B5E800C00A0090B /* Controllers */ = {
 			isa = PBXGroup;
 			children = (
+				E2F995E11B50460F00BFB722 /* MapViewController.swift */,
 			);
 			name = Controllers;
 			sourceTree = "<group>";
@@ -89,6 +94,8 @@
 			children = (
 				E20D3BA41B5E82F200A0090B /* Photo.swift */,
 				E20D3BA21B5E82F100A0090B /* Pin.swift */,
+				E24FEB281BA60DFB009B40A7 /* CoreDataStackManager.swift */,
+				E24FEB261BA60612009B40A7 /* VTAnnotation.swift */,
 			);
 			name = Model;
 			sourceTree = "<group>";
@@ -124,7 +131,6 @@
 				E2F995CA1B50435400BFB722 /* LaunchScreen.xib */,
 				E2F995C01B50435400BFB722 /* VirtualTourist.xcdatamodeld */,
 				E2F995BC1B50435400BFB722 /* Supporting Files */,
-				E2F995E11B50460F00BFB722 /* MapViewController.swift */,
 			);
 			path = VirtualTourist;
 			sourceTree = "<group>";
@@ -257,6 +263,8 @@
 				E20D3BA51B5E82F200A0090B /* Photo.swift in Sources */,
 				E2F995C41B50435400BFB722 /* ViewController.swift in Sources */,
 				E20D3BA11B5E806400A0090B /* FlickrClient.swift in Sources */,
+				E24FEB291BA60DFB009B40A7 /* CoreDataStackManager.swift in Sources */,
+				E24FEB271BA60612009B40A7 /* VTAnnotation.swift in Sources */,
 				E2F995C21B50435400BFB722 /* VirtualTourist.xcdatamodeld in Sources */,
 				E20D3BA31B5E82F100A0090B /* Pin.swift in Sources */,
 				E2F995BF1B50435400BFB722 /* AppDelegate.swift in Sources */,

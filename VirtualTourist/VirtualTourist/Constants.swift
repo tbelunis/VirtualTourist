@@ -52,4 +52,12 @@ extension FlickrClient {
         static let Title = "title"
         static let IsPublic = "ispublic"
     }
+    
+    struct NSUserDefaultKeys {
+        static let StartMapPositionSaved = "start_map_position_saved"
+        static let StartMapCenterLatitude = "start_map_center_lat"
+        static let StartMapCenterLongitude = "start_map_center_lon"
+        static let StartMapDeltaLatitude = "start_map_delta_lat"
+        static let StartMapDeltaLongitude = "start_map_delta_lon"
+    }
 }
