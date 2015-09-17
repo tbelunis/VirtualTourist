@@ -68,14 +68,15 @@ class MapViewController: UIViewController, MKMapViewDelegate {
     
     func addPinToMap(gestureRecogizer: UILongPressGestureRecognizer) {
         let coordinate = mapView.convertPoint(gestureRecogizer.locationInView(self.mapView), toCoordinateFromView: self.mapView)
-        let annotation = VTAnnotation(coordinate: coordinate, title: "", subtitle: "")
+        let pin = Pin(coordinate.latitude, coordinate.longitude, NSSet(), sharedContext)
+        sharedContext.save()
         dispatch_async(dispatch_get_main_queue(), {
-            self.mapView.addAnnotation(annotation)
+            self.mapView.addAnnotation(pin)
         })
         
     }
     
-    func mapView(mapView: MKMapView!, regionDidChangeAnimated animated: Bool) {
+    func mapView(mapView: MKMapView, regionDidChangeAnimated animated: Bool) {
         let centerCoordinate = mapView.centerCoordinate
         let region = mapView.region
         let centerLatitude = centerCoordinate.latitude

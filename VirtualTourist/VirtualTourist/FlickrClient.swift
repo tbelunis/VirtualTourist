@@ -34,11 +34,11 @@ class FlickrClient: NSObject {
         let request = NSURLRequest(URL: url!)
         let task = session.dataTaskWithRequest(request) { data, response, error in
             if let error = error {
-                println("Could not complete the request \(error)")
+                print("Could not complete the request \(error)")
             } else {
                 
                 var parsingError: NSError? = nil
-                let parsedResult = NSJSONSerialization.JSONObjectWithData(data, options: NSJSONReadingOptions.AllowFragments, error: &parsingError) as! NSDictionary
+                let parsedResult = (try! NSJSONSerialization.JSONObjectWithData(data, options: NSJSONReadingOptions.AllowFragments)) as! NSDictionary
                 
                 if let photosDictionary = parsedResult.valueForKey("photos") as? [String:AnyObject] {
                     
@@ -50,10 +50,10 @@ class FlickrClient: NSObject {
 //                        self.getImageFromFlickrBySearchWithPage(methodArguments, pageNumber: randomPage)
                         
                     } else {
-                        println("Cant find key 'pages' in \(photosDictionary)")
+                        print("Cant find key 'pages' in \(photosDictionary)")
                     }
                 } else {
-                    println("Cant find key 'photos' in \(parsedResult)")
+                    print("Cant find key 'photos' in \(parsedResult)")
                 }
             }
         }
@@ -96,7 +96,7 @@ class FlickrClient: NSObject {
             
         }
         
-        return (!urlVars.isEmpty ? "?" : "") + join("&", urlVars)
+        return (!urlVars.isEmpty ? "?" : "") + urlVars.joinWithSeparator("&")
     }
     
     class func sharedInstance() -> FlickrClient {
