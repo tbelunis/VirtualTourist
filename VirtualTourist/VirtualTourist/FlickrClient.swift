@@ -37,15 +37,15 @@ class FlickrClient: NSObject {
                 print("Could not complete the request \(error)")
             } else {
                 
-                var parsingError: NSError? = nil
-                let parsedResult = (try! NSJSONSerialization.JSONObjectWithData(data, options: NSJSONReadingOptions.AllowFragments)) as! NSDictionary
+//                let error: NSError? = nil
+                let parsedResult = (try! NSJSONSerialization.JSONObjectWithData(data!, options: NSJSONReadingOptions.AllowFragments)) as! NSDictionary
                 
                 if let photosDictionary = parsedResult.valueForKey("photos") as? [String:AnyObject] {
                     
                     if let totalPages = photosDictionary["pages"] as? Int {
                         
                         /* Flickr API - will only return up the 4000 images (100 per page * 40 page max) */
-                        let pageLimit = min(totalPages, 40)
+                        _ = min(totalPages, 40)
 //                        let randomPage = Int(arc4random_uniform(UInt32(pageLimit))) + 1
 //                        self.getImageFromFlickrBySearchWithPage(methodArguments, pageNumber: randomPage)
                         

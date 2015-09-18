@@ -37,15 +37,17 @@ class MapViewController: UIViewController, MKMapViewDelegate {
         // Dispose of any resources that can be recreated.
     }
 
-    /*
     // MARK: - Navigation
 
     // In a storyboard-based application, you will often want to do a little preparation before navigation
     override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
         // Get the new view controller using segue.destinationViewController.
         // Pass the selected object to the new view controller.
+        let photoController = segue.destinationViewController as! PhotoViewController
+        let annotation = sender as? MKAnnotation
+        photoController.coordinates = annotation?.coordinate
     }
-    */
+
 
     func setInitialMapView() {
         let defaults = NSUserDefaults.standardUserDefaults()
@@ -64,12 +66,30 @@ class MapViewController: UIViewController, MKMapViewDelegate {
                 self.mapView.setRegion(region, animated: true)
             })
         }
+        
+        let pinFetchRequest = NSFetchRequest(entityName: "Pin")
+//        let pinCount = sharedContext.countForFetchRequest(pinFetchRequest, error: nil)
+        do {
+            let pins = try sharedContext.executeFetchRequest(pinFetchRequest) as! [Pin]
+            dispatch_async(dispatch_get_main_queue(), {
+                self.mapView.addAnnotations(pins)
+            })
+            
+        } catch let error1 as NSError {
+            print(error1)
+        }
     }
     
     func addPinToMap(gestureRecogizer: UILongPressGestureRecognizer) {
         let coordinate = mapView.convertPoint(gestureRecogizer.locationInView(self.mapView), toCoordinateFromView: self.mapView)
-        let pin = Pin(coordinate.latitude, coordinate.longitude, NSSet(), sharedContext)
-        sharedContext.save()
+        let pin = Pin(latitude: coordinate.latitude, longitude: coordinate.longitude, photos: NSSet(), context: sharedContext)
+        do {
+            
+        try
+            self.sharedContext.save()
+        } catch let error1 as NSError {
+            print(error1)
+        }
         dispatch_async(dispatch_get_main_queue(), {
             self.mapView.addAnnotation(pin)
         })
@@ -90,6 +110,21 @@ class MapViewController: UIViewController, MKMapViewDelegate {
         defaults.setDouble(latitudeDelta, forKey: FlickrClient.NSUserDefaultKeys.StartMapDeltaLatitude)
         defaults.setDouble(longitudeDelta, forKey: FlickrClient.NSUserDefaultKeys.StartMapDeltaLongitude)
         defaults.setBool(true, forKey: FlickrClient.NSUserDefaultKeys.StartMapPositionSaved)
+    }
+    
+    func mapView(mapView: MKMapView, viewForAnnotation annotation: MKAnnotation) -> MKAnnotationView? {
+        let reuseIdentifier = "pin"
+        var view = mapView.dequeueReusableAnnotationViewWithIdentifier(reuseIdentifier) as? MKPinAnnotationView
+        if view == nil {
+            view = MKPinAnnotationView(annotation: annotation, reuseIdentifier: reuseIdentifier)
+        }
+        
+        return view
+    }
+    
+    func mapView(mapView: MKMapView, didSelectAnnotationView view: MKAnnotationView) {
+        print(view.annotation?.coordinate)
+        self.performSegueWithIdentifier("showPhotos", sender: view.annotation)
     }
 }
 
