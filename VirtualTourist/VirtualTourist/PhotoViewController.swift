@@ -23,9 +23,12 @@ class PhotoViewController: UIViewController, UICollectionViewDataSource, UIColle
     var coordinates: CLLocationCoordinate2D!
     var photos: [Photo] = [Photo]()
     
+    var pin: Pin!
+    
     override func viewDidLoad() {
         super.viewDidLoad()
-        print(coordinates)
+        print("Pin at \(pin.latitude), \(pin.longitude)")
+        
         // Do any additional setup after loading the view.
     }
 
@@ -35,7 +38,7 @@ class PhotoViewController: UIViewController, UICollectionViewDataSource, UIColle
     }
     
     func collectionView(collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return photos.count
+        return 0
     }
     
     func collectionView(collectionView: UICollectionView, cellForItemAtIndexPath indexPath: NSIndexPath) -> UICollectionViewCell {

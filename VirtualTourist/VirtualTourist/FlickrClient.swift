@@ -17,8 +17,8 @@ class FlickrClient: NSObject {
         super.init()
     }
     
-    func getPhotosForPin(pin: Pin, completionHandler: (result: [Photo?], error: NSError) -> Void) -> NSURLSessionDataTask {
-        let methodArguments = [
+    func getPhotosForPin(pin: Pin, completionHandler: (result: [Photo?], error: NSError?) -> Void) -> Void {
+        let methodArguments: [String : AnyObject] = [
             JSONBodyKeys.Method : Methods.FlickrSearchMethod,
             JSONBodyKeys.ApiKey : Constants.FlickrApiKey,
             JSONBodyKeys.SafeSearch : Constants.SafeSearch,
@@ -29,40 +29,123 @@ class FlickrClient: NSObject {
             JSONBodyKeys.PerPage : Constants.PerPage
         ]
         
-        let urlString = Constants.FlickrBaseUrl + escapedParameters(methodArguments as! [String : AnyObject])
+        let urlString = Constants.FlickrBaseUrl + escapedParameters(methodArguments)
         let url = NSURL(string: urlString)
         let request = NSURLRequest(URL: url!)
         let task = session.dataTaskWithRequest(request) { data, response, error in
-            if let error = error {
+            guard (error == nil) else {
                 print("Could not complete the request \(error)")
-            } else {
-                
-//                let error: NSError? = nil
-                let parsedResult = (try! NSJSONSerialization.JSONObjectWithData(data!, options: NSJSONReadingOptions.AllowFragments)) as! NSDictionary
-                
-                if let photosDictionary = parsedResult.valueForKey("photos") as? [String:AnyObject] {
-                    
-                    if let totalPages = photosDictionary["pages"] as? Int {
-                        
-                        /* Flickr API - will only return up the 4000 images (100 per page * 40 page max) */
-                        _ = min(totalPages, 40)
-//                        let randomPage = Int(arc4random_uniform(UInt32(pageLimit))) + 1
-//                        self.getImageFromFlickrBySearchWithPage(methodArguments, pageNumber: randomPage)
-                        
-                    } else {
-                        print("Cant find key 'pages' in \(photosDictionary)")
-                    }
-                } else {
-                    print("Cant find key 'photos' in \(parsedResult)")
-                }
+                return
             }
+            
+            guard let statusCode = (response as? NSHTTPURLResponse)?.statusCode where statusCode >= 200 && statusCode <= 299 else {
+                if let response = response as? NSHTTPURLResponse {
+                    print("Your request returned an invalid response! Status code: \(response.statusCode)!")
+                } else if let response = response {
+                    print("Your request returned an invalid response! Response: \(response)!")
+                } else {
+                    print("Your request returned an invalid response!")
+                }
+                return
+            }
+            
+            guard let data = data else {
+                print("No data was returned")
+                return
+            }
+
+            let parsedResult: AnyObject!
+            do {
+                parsedResult = try NSJSONSerialization.JSONObjectWithData(data, options: NSJSONReadingOptions.AllowFragments)
+            } catch {
+                parsedResult = nil
+                print("Could not parse the data as JSON: '\(data)'")
+                return
+            }
+            
+            guard let stat = parsedResult["stat"] as? String where stat == "ok" else {
+                print("Flickr API returned an error. See error code and message in \(parsedResult)")
+                return
+            }
+            
+            guard let photosDictionary = parsedResult.valueForKey("photos") as? NSDictionary else {
+                print("Cannot find key 'photos' in \(parsedResult)")
+                return
+            }
+            
+            guard let totalPages = photosDictionary["pages"] as? Int else {
+                print("Cannot find key 'pages' in \(parsedResult)")
+                return
+            }
+            
+            /* Flickr API - will only return up the 4000 images (21 per page * 21 page max) */
+            let pageLimit = min(totalPages, 100)
+            let randomPage = Int(arc4random_uniform(UInt32(pageLimit))) + 1
+            
         }
         
         task.resume()
         
-        return task
-        
+        //return self.getImageFromFlickrBySearchWithPage(methodArguments, pageNumber: randomPage)
+       
     }
+    
+//    func getImageFromFlickrBySearchWithPage(methodArguments: [String : AnyObject], pageNumber: Int, completionHandler: (result: [Photo?], error: NSError?) -> Void) -> NSURLSessionDataTask {
+//        
+//        var argumentsWithPage = methodArguments
+//        argumentsWithPage["page"] = pageNumber
+//        
+//        let session = NSURLSession.sharedSession()
+//        let urlString = FlickrClient.Constants.FlickrBaseUrl + escapedParameters(argumentsWithPage)
+//        let url = NSURL(string: urlString)!
+//        let request = NSURLRequest(URL: url)
+//        
+//        let task = session.dataTaskWithRequest(request) { (data, response, error) in
+//            guard (error == nil) else {
+//                print("Could not complete the request \(error)")
+//            }
+//            
+//            guard let statusCode = (response as? NSHTTPURLResponse)?.statusCode where statusCode >= 200 && statusCode <= 299 else {
+//                if let response = response as? NSHTTPURLResponse {
+//                    print("Your request returned an invalid response! Status code: \(response.statusCode)!")
+//                } else if let response = response {
+//                    print("Your request returned an invalid response! Response: \(response)!")
+//                } else {
+//                    print("Your request returned an invalid response!")
+//                }
+//                return
+//            }
+//            
+//            guard let data = data else {
+//                print("No data was returned")
+//            }
+//            
+//            let parsedResult: AnyObject!
+//            do {
+//                parsedResult = try NSJSONSerialization.JSONObjectWithData(data, options: NSJSONReadingOptions.AllowFragments)
+//            } catch {
+//                parsedResult = nil
+//                print("Could not parse the data as JSON: '\(data)'")
+//                return
+//            }
+//            
+//            guard let stat = parsedResult["stat"] as? String where stat == "ok" else {
+//                print("Flickr API returned an error. See error code and message in \(parsedResult)")
+//                return
+//            }
+//            
+//            guard let photosDictionary = parsedResult.valueForKey("photos") as? NSDictionary else {
+//                print("Cannot find key 'photos' in \(parsedResult)")
+//                return
+//            }
+//            
+//            guard let totalPhotos = (photosDictionary["total"] as? NSString)?.integerValue else {
+//                print("Cannot find key 'total' in \(parsedResult)")
+//            }
+//            
+//           
+//            
+//    }
     
     func createBoundingBoxString(pin: Pin) -> String {
         

@@ -15,4 +15,15 @@ class Photo: NSManagedObject {
     @NSManaged var id: NSNumber
     @NSManaged var photo_pin: Pin
 
+    override init(entity: NSEntityDescription, insertIntoManagedObjectContext context: NSManagedObjectContext?) {
+        super.init(entity:entity, insertIntoManagedObjectContext: context)
+    }
+    
+    init(path: String, pin: Pin, context: NSManagedObjectContext) {
+        let entity = NSEntityDescription.entityForName("Photo", inManagedObjectContext: context)!
+        super.init(entity: entity, insertIntoManagedObjectContext: context)
+        
+        self.path = path
+        self.photo_pin = pin
+    }
 }

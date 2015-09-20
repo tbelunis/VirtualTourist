@@ -44,8 +44,8 @@ class MapViewController: UIViewController, MKMapViewDelegate {
         // Get the new view controller using segue.destinationViewController.
         // Pass the selected object to the new view controller.
         let photoController = segue.destinationViewController as! PhotoViewController
-        let annotation = sender as? MKAnnotation
-        photoController.coordinates = annotation?.coordinate
+        let pin = sender as? Pin
+        photoController.pin = pin
     }
 
 
@@ -68,7 +68,6 @@ class MapViewController: UIViewController, MKMapViewDelegate {
         }
         
         let pinFetchRequest = NSFetchRequest(entityName: "Pin")
-//        let pinCount = sharedContext.countForFetchRequest(pinFetchRequest, error: nil)
         do {
             let pins = try sharedContext.executeFetchRequest(pinFetchRequest) as! [Pin]
             dispatch_async(dispatch_get_main_queue(), {
@@ -81,18 +80,19 @@ class MapViewController: UIViewController, MKMapViewDelegate {
     }
     
     func addPinToMap(gestureRecogizer: UILongPressGestureRecognizer) {
-        let coordinate = mapView.convertPoint(gestureRecogizer.locationInView(self.mapView), toCoordinateFromView: self.mapView)
-        let pin = Pin(latitude: coordinate.latitude, longitude: coordinate.longitude, photos: NSSet(), context: sharedContext)
-        do {
-            
-        try
-            self.sharedContext.save()
-        } catch let error1 as NSError {
-            print(error1)
+        if gestureRecogizer.state == UIGestureRecognizerState.Ended {
+            let coordinate = mapView.convertPoint(gestureRecogizer.locationInView(self.mapView), toCoordinateFromView: self.mapView)
+            let pin = Pin(latitude: coordinate.latitude, longitude: coordinate.longitude, photos: NSSet(), context: sharedContext)
+            do {
+            try
+                self.sharedContext.save()
+            } catch let error1 as NSError {
+                print(error1)
+            }
+            dispatch_async(dispatch_get_main_queue(), {
+                self.mapView.addAnnotation(pin)
+            })
         }
-        dispatch_async(dispatch_get_main_queue(), {
-            self.mapView.addAnnotation(pin)
-        })
         
     }
     
@@ -124,7 +124,21 @@ class MapViewController: UIViewController, MKMapViewDelegate {
     
     func mapView(mapView: MKMapView, didSelectAnnotationView view: MKAnnotationView) {
         print(view.annotation?.coordinate)
-        self.performSegueWithIdentifier("showPhotos", sender: view.annotation)
+        let fetchRequest = NSFetchRequest(entityName: "Pin")
+    
+        let latitudePredicate = NSPredicate(format: "latitude = %@", NSNumber(double: (view.annotation?.coordinate.latitude)!))
+        let longitudePredicate = NSPredicate(format: "longitude = %@", NSNumber(double: (view.annotation?.coordinate.longitude)!))
+        fetchRequest.predicate = NSCompoundPredicate(andPredicateWithSubpredicates: [latitudePredicate, longitudePredicate])
+        var pin: Pin
+        do {
+            let result = try sharedContext.executeFetchRequest(fetchRequest) as! [Pin]
+            if result.count > 0 {
+                pin = result.first! as Pin
+                self.performSegueWithIdentifier("showPhotos", sender: pin)
+            }
+        } catch let error as NSError {
+            print(error)
+        }
     }
 }
 
