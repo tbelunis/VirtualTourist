@@ -25,5 +25,32 @@ class Photo: NSManagedObject {
         
         self.path = path
         self.photo_pin = pin
+        
+        print(self)
     }
+    
+    var photoImage: NSData {
+        get {
+            let photoPath = documentsDirectory.stringByAppendingPathComponent(path)
+            if NSFileManager.defaultManager().fileExistsAtPath(photoPath) {
+                return NSData(contentsOfFile: photoPath)!
+            } else {
+                return NSData()
+            }
+        }
+    }
+    
+    override func prepareForDeletion() {
+        do {
+            try NSFileManager.defaultManager().removeItemAtPath(path)
+        } catch let error as NSError {
+            print(error)
+        }
+    }
+
+    
 }
+
+
+
+

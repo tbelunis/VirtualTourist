@@ -13,6 +13,8 @@ import CoreData
 class MapViewController: UIViewController, MKMapViewDelegate {
 
     @IBOutlet weak var mapView: MKMapView!
+    @IBOutlet weak var activityIndicator: UIActivityIndicatorView!
+    
     var longPressGestureRecognizer: UILongPressGestureRecognizer?
     
     lazy var sharedContext: NSManagedObjectContext = {
@@ -28,6 +30,8 @@ class MapViewController: UIViewController, MKMapViewDelegate {
         let longPressGestureRecognizer = UILongPressGestureRecognizer(target: self, action: "addPinToMap:")
         
         mapView.addGestureRecognizer(longPressGestureRecognizer)
+
+//        startOver()
         
         setInitialMapView()
     }
@@ -81,6 +85,7 @@ class MapViewController: UIViewController, MKMapViewDelegate {
     
     func addPinToMap(gestureRecogizer: UILongPressGestureRecognizer) {
         if gestureRecogizer.state == UIGestureRecognizerState.Ended {
+            print("Detected long press")
             let coordinate = mapView.convertPoint(gestureRecogizer.locationInView(self.mapView), toCoordinateFromView: self.mapView)
             let pin = Pin(latitude: coordinate.latitude, longitude: coordinate.longitude, photos: NSSet(), context: sharedContext)
             do {
@@ -134,7 +139,51 @@ class MapViewController: UIViewController, MKMapViewDelegate {
             let result = try sharedContext.executeFetchRequest(fetchRequest) as! [Pin]
             if result.count > 0 {
                 pin = result.first! as Pin
-                self.performSegueWithIdentifier("showPhotos", sender: pin)
+//                if pin.pin_photo.count == 0 {
+//                    dispatch_async(dispatch_get_main_queue(), {
+//                        self.activityIndicator.startAnimating()
+//                    })
+//                    FlickrClient.sharedInstance().getPhotosForPin(pin) { data, hasPhotos, error in
+//                        dispatch_async(dispatch_get_main_queue(), {
+//                            self.activityIndicator.stopAnimating()
+//                        })
+//                        guard (error == nil) else {
+//                            print("Error occurred: \(error)")
+//                            return
+//                        }
+//                        
+//                        if hasPhotos == true {
+//                            print("Retrieved \(pin.pin_photo.count) photos")
+//                        } else {
+//                            print("No photos found")
+//                        }
+//                        dispatch_async(dispatch_get_main_queue(), {
+//                            self.performSegueWithIdentifier("showPhotos", sender: pin)
+//                        })
+//                    }
+//                } else {
+                    self.performSegueWithIdentifier("showPhotos", sender: pin)
+//                }
+                
+            }
+        } catch let error as NSError {
+            print(error)
+        }
+    }
+    
+    func startOver() {
+        let fetchRequest = NSFetchRequest(entityName: "Pin")
+        do {
+            let result = try sharedContext.executeFetchRequest(fetchRequest) as! [Pin]
+            if result.count > 0 {
+                for (var i = 0; i < result.count; i++) {
+                    for photo: Photo in result[i].pin_photo.allObjects as! [Photo]
+                    {
+                        sharedContext.deleteObject(photo)
+                    }
+                    
+                    sharedContext.deleteObject(result[i])
+                }
             }
         } catch let error as NSError {
             print(error)

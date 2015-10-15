@@ -12,9 +12,9 @@ extension FlickrClient {
     struct Constants {
         static let FlickrApiKey = "d9a1e2ba78c6cdc8b7f4ee9d404fa597"
         static let FlickrBaseUrl = "https://api.flickr.com/services/rest/"
-        static let BoundingBoxHeight = 1.0
-        static let BoundingBoxWidth = 1.0
-        static let Extras = "m_url"
+        static let BoundingBoxHeight = 0.1
+        static let BoundingBoxWidth = 0.1
+        static let Extras = "url_m"
         static let DataFormat = "json"
         static let SafeSearch = "1"
         static let NoJSONCallback = "1"
@@ -22,7 +22,8 @@ extension FlickrClient {
         static let MaximumLatitude = 90.0
         static let MinimumLongitude = -180.0
         static let MaximumLongitude = 180.0
-        static let PerPage = 21
+        static let PerPage = 30
+        static let HttpSuccessRange = 200...299
     }
     
     struct Methods {
@@ -38,7 +39,7 @@ extension FlickrClient {
         static let Extras = "extras"
         static let Format = "format"
         static let NoJSONCallback = "nojsoncallback"
-        static let PerPage = "perpage"
+        static let PerPage = "per_page"
     }
 
     struct JSONResponseKeys {

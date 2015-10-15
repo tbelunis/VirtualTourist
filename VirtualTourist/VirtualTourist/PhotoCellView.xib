@@ -5,32 +5,30 @@
         <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="8154"/>
     </dependencies>
     <objects>
-        <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner" customClass="SentMemeCollectionViewCell" customModule="VirtualTourist" customModuleProvider="target"/>
+        <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner"/>
         <placeholder placeholderIdentifier="IBFirstResponder" id="-2" customClass="UIResponder"/>
-        <collectionViewCell opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" reuseIdentifier="MemeCollectionCell" id="PWU-8t-aV2" customClass="PhotoCollectionViewCell" customModule="VirtualTourist" customModuleProvider="target">
+        <collectionViewCell opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" reuseIdentifier="PhotoCell" id="Rqg-eZ-TS9" customClass="PhotoCollectionViewCell" customModule="VirtualTourist" customModuleProvider="target">
             <rect key="frame" x="0.0" y="0.0" width="200" height="200"/>
             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
             <view key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center">
                 <rect key="frame" x="0.0" y="0.0" width="200" height="200"/>
                 <autoresizingMask key="autoresizingMask"/>
                 <subviews>
-                    <imageView contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="Image" translatesAutoresizingMaskIntoConstraints="NO" id="eXX-eN-KU4">
+                    <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" image="Image" translatesAutoresizingMaskIntoConstraints="NO" id="lHk-im-NY1">
                         <rect key="frame" x="0.0" y="0.0" width="200" height="200"/>
                     </imageView>
+                    <activityIndicatorView opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" fixedFrame="YES" style="gray" translatesAutoresizingMaskIntoConstraints="NO" id="Pp4-VA-wvW">
+                        <rect key="frame" x="90" y="90" width="20" height="20"/>
+                    </activityIndicatorView>
                 </subviews>
                 <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
             </view>
-            <constraints>
-                <constraint firstItem="eXX-eN-KU4" firstAttribute="leading" secondItem="PWU-8t-aV2" secondAttribute="leading" id="3ra-PT-BZC"/>
-                <constraint firstItem="eXX-eN-KU4" firstAttribute="top" secondItem="PWU-8t-aV2" secondAttribute="top" id="Vo4-TY-AbT"/>
-                <constraint firstAttribute="bottom" secondItem="eXX-eN-KU4" secondAttribute="bottom" id="Yo3-hc-6mm"/>
-                <constraint firstAttribute="trailing" secondItem="eXX-eN-KU4" secondAttribute="trailing" id="pef-Ts-xax"/>
-            </constraints>
-            <size key="customSize" width="201" height="148"/>
+            <size key="customSize" width="139" height="134"/>
             <connections>
-                <outlet property="memeImageView" destination="eXX-eN-KU4" id="iHI-zZ-WSc"/>
+                <outlet property="activityIndicator" destination="Pp4-VA-wvW" id="fU2-yb-MY2"/>
+                <outlet property="image" destination="lHk-im-NY1" id="rCP-A0-CmW"/>
             </connections>
-            <point key="canvasLocation" x="404.5" y="269"/>
+            <point key="canvasLocation" x="394" y="-4"/>
         </collectionViewCell>
     </objects>
     <resources>
