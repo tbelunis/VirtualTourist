@@ -30,9 +30,7 @@ class MapViewController: UIViewController, MKMapViewDelegate {
         let longPressGestureRecognizer = UILongPressGestureRecognizer(target: self, action: "addPinToMap:")
         
         mapView.addGestureRecognizer(longPressGestureRecognizer)
-
-//        startOver()
-        
+        activityIndicator.hidden = true
         setInitialMapView()
     }
 
@@ -139,32 +137,7 @@ class MapViewController: UIViewController, MKMapViewDelegate {
             let result = try sharedContext.executeFetchRequest(fetchRequest) as! [Pin]
             if result.count > 0 {
                 pin = result.first! as Pin
-//                if pin.pin_photo.count == 0 {
-//                    dispatch_async(dispatch_get_main_queue(), {
-//                        self.activityIndicator.startAnimating()
-//                    })
-//                    FlickrClient.sharedInstance().getPhotosForPin(pin) { data, hasPhotos, error in
-//                        dispatch_async(dispatch_get_main_queue(), {
-//                            self.activityIndicator.stopAnimating()
-//                        })
-//                        guard (error == nil) else {
-//                            print("Error occurred: \(error)")
-//                            return
-//                        }
-//                        
-//                        if hasPhotos == true {
-//                            print("Retrieved \(pin.pin_photo.count) photos")
-//                        } else {
-//                            print("No photos found")
-//                        }
-//                        dispatch_async(dispatch_get_main_queue(), {
-//                            self.performSegueWithIdentifier("showPhotos", sender: pin)
-//                        })
-//                    }
-//                } else {
-                    self.performSegueWithIdentifier("showPhotos", sender: pin)
-//                }
-                
+                self.performSegueWithIdentifier("showPhotos", sender: pin)
             }
         } catch let error as NSError {
             print(error)

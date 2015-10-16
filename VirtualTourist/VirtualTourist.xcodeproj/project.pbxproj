@@ -15,7 +15,7 @@
 		E23915F81BABA0310038DA82 /* PhotoCollectionViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = E23915F71BABA0310038DA82 /* PhotoCollectionViewCell.swift */; settings = {ASSET_TAGS = (); }; };
 		E24FEB271BA60612009B40A7 /* VTAnnotation.swift in Sources */ = {isa = PBXBuildFile; fileRef = E24FEB261BA60612009B40A7 /* VTAnnotation.swift */; };
 		E24FEB291BA60DFB009B40A7 /* CoreDataStackManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = E24FEB281BA60DFB009B40A7 /* CoreDataStackManager.swift */; };
-		E2C864B51BC0686C00C89847 /* PhotoCellView.xib in Resources */ = {isa = PBXBuildFile; fileRef = E2C864B41BC0686C00C89847 /* PhotoCellView.xib */; settings = {ASSET_TAGS = (); }; };
+		E2A12D3B1BD0492A00DC9337 /* PhotoCellView.xib in Resources */ = {isa = PBXBuildFile; fileRef = E2A12D3A1BD0492A00DC9337 /* PhotoCellView.xib */; settings = {ASSET_TAGS = (); }; };
 		E2C864B71BC068F600C89847 /* PhotoCollectionCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = E2C864B61BC068F600C89847 /* PhotoCollectionCell.xib */; settings = {ASSET_TAGS = (); }; };
 		E2F995BF1B50435400BFB722 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = E2F995BE1B50435400BFB722 /* AppDelegate.swift */; };
 		E2F995C21B50435400BFB722 /* VirtualTourist.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = E2F995C01B50435400BFB722 /* VirtualTourist.xcdatamodeld */; };
@@ -46,7 +46,7 @@
 		E23915F71BABA0310038DA82 /* PhotoCollectionViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PhotoCollectionViewCell.swift; sourceTree = "<group>"; };
 		E24FEB261BA60612009B40A7 /* VTAnnotation.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = VTAnnotation.swift; sourceTree = "<group>"; };
 		E24FEB281BA60DFB009B40A7 /* CoreDataStackManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CoreDataStackManager.swift; sourceTree = "<group>"; };
-		E2C864B41BC0686C00C89847 /* PhotoCellView.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = PhotoCellView.xib; sourceTree = "<group>"; };
+		E2A12D3A1BD0492A00DC9337 /* PhotoCellView.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = PhotoCellView.xib; sourceTree = "<group>"; };
 		E2C864B61BC068F600C89847 /* PhotoCollectionCell.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = PhotoCollectionCell.xib; sourceTree = "<group>"; };
 		E2F995B91B50435400BFB722 /* VirtualTourist.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = VirtualTourist.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		E2F995BD1B50435400BFB722 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -112,7 +112,7 @@
 		E23915F61BABA00C0038DA82 /* View */ = {
 			isa = PBXGroup;
 			children = (
-				E2C864B41BC0686C00C89847 /* PhotoCellView.xib */,
+				E2A12D3A1BD0492A00DC9337 /* PhotoCellView.xib */,
 				E23915F71BABA0310038DA82 /* PhotoCollectionViewCell.swift */,
 				E2C864B61BC068F600C89847 /* PhotoCollectionCell.xib */,
 			);
@@ -263,10 +263,10 @@
 			buildActionMask = 2147483647;
 			files = (
 				E2F995C71B50435400BFB722 /* Main.storyboard in Resources */,
+				E2A12D3B1BD0492A00DC9337 /* PhotoCellView.xib in Resources */,
 				E2C864B71BC068F600C89847 /* PhotoCollectionCell.xib in Resources */,
 				E2F995CC1B50435400BFB722 /* LaunchScreen.xib in Resources */,
 				E2F995C91B50435400BFB722 /* Images.xcassets in Resources */,
-				E2C864B51BC0686C00C89847 /* PhotoCellView.xib in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

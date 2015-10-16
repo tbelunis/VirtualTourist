@@ -14,35 +14,28 @@ class Photo: NSManagedObject {
     @NSManaged var path: String
     @NSManaged var id: NSNumber
     @NSManaged var photo_pin: Pin
+    var url: NSURL?
 
     override init(entity: NSEntityDescription, insertIntoManagedObjectContext context: NSManagedObjectContext?) {
         super.init(entity:entity, insertIntoManagedObjectContext: context)
     }
     
-    init(path: String, pin: Pin, context: NSManagedObjectContext) {
+    init(url: NSURL, pin: Pin, context: NSManagedObjectContext) {
         let entity = NSEntityDescription.entityForName("Photo", inManagedObjectContext: context)!
         super.init(entity: entity, insertIntoManagedObjectContext: context)
         
-        self.path = path
+        self.url = url
+        self.path = (url.lastPathComponent)!
         self.photo_pin = pin
-        
-        print(self)
-    }
-    
-    var photoImage: NSData {
-        get {
-            let photoPath = documentsDirectory.stringByAppendingPathComponent(path)
-            if NSFileManager.defaultManager().fileExistsAtPath(photoPath) {
-                return NSData(contentsOfFile: photoPath)!
-            } else {
-                return NSData()
-            }
-        }
+
     }
     
     override func prepareForDeletion() {
+        let photoPath = documentsDirectory.stringByAppendingPathComponent(path)
         do {
-            try NSFileManager.defaultManager().removeItemAtPath(path)
+            if NSFileManager.defaultManager().fileExistsAtPath(photoPath) {
+                try NSFileManager.defaultManager().removeItemAtPath(photoPath)
+            }
         } catch let error as NSError {
             print(error)
         }

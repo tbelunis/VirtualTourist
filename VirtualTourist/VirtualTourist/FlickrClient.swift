@@ -13,11 +13,13 @@ import CoreData
 typealias PhotoCompletionHandler = (result: Bool, error: NSError?) -> Void
 typealias PhotoDataCompletionHandler = (data: NSData?, error: NSError?) -> Void
 
+
 let documentsDirectory: NSString = NSSearchPathForDirectoriesInDomains(.DocumentDirectory, .UserDomainMask, true)[0]
 
 
 class FlickrClient: NSObject {
     var session: NSURLSession
+    static var page = 0
     
     override init() {
         session = NSURLSession.sharedSession()
@@ -29,7 +31,6 @@ class FlickrClient: NSObject {
         }()
     
     func getPhotosForPin(pin: Pin, completionHandler: PhotoCompletionHandler) -> Void {
-        var randomPage = 1
         
         let methodArguments: [String : AnyObject] = [
             JSONBodyKeys.Method : Methods.FlickrSearchMethod,
@@ -37,7 +38,6 @@ class FlickrClient: NSObject {
             JSONBodyKeys.SafeSearch : Constants.SafeSearch,
             JSONBodyKeys.BoundingBox : createBoundingBoxString(pin),
             JSONBodyKeys.Format : Constants.DataFormat,
-            JSONBodyKeys.Extras : Constants.Extras,
             JSONBodyKeys.NoJSONCallback : Constants.NoJSONCallback,
             JSONBodyKeys.PerPage : Constants.PerPage
         ]
@@ -91,15 +91,14 @@ class FlickrClient: NSObject {
                 return
             }
             
-            /* Flickr API - will only return up the 4000 images (21 per page * 21 page max) */
-            let pageLimit = min(totalPages, 100)
-            randomPage = Int(arc4random_uniform(UInt32(pageLimit))) + 1
-            
+            if ++FlickrClient.page > totalPages {
+                FlickrClient.page = 1
+            }
         }
         
         task.resume()
         
-        return self.getImageFromFlickrBySearchWithPage(pin, methodArguments: methodArguments, pageNumber: randomPage, completionHandler: completionHandler)
+        return self.getImageFromFlickrBySearchWithPage(pin, methodArguments: methodArguments, pageNumber: FlickrClient.page, completionHandler: completionHandler)
        
     }
     
@@ -168,13 +167,9 @@ class FlickrClient: NSObject {
                 let photoSet: NSMutableSet = NSMutableSet()
                 
                 for photo in photosArray {
-                    let urlString = photo["url_m"] as? String
-                    if let url = urlString {
-                        let newPhoto = Photo(path: url, pin: pin, context: self.sharedContext)
-                        photoSet.addObject(newPhoto)
-                    }
-
-
+                    
+                    let newPhoto = Photo(url: self.getFlickrUrlForPhoto(photo), pin: pin, context: self.sharedContext)
+                    photoSet.addObject(newPhoto)
                 }
                 
                 if photoSet.count > 0 {
@@ -193,9 +188,13 @@ class FlickrClient: NSObject {
         
     }
     
-    func getPhotoFromUrl(urlString: String, completionHandler: PhotoDataCompletionHandler) {
+    func getPhotoFromUrl(url: NSURL, completionHandler: PhotoDataCompletionHandler) {
         dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0)) {
-            if let imageData = NSData(contentsOfURL: NSURL(string: urlString)!) {
+            print("Fetching \(url)")
+            if let imageData = NSData(contentsOfURL:url) {
+//                print("Saving \(url.lastPathComponent!)")
+                let photoPath = documentsDirectory.stringByAppendingPathComponent(url.lastPathComponent!)
+                imageData.writeToFile(photoPath, atomically: true)
                 completionHandler(data: imageData, error: nil)
             } else {
                 completionHandler(data: nil, error: NSError(domain: "getPhotoFromUrl", code: -1, userInfo: [NSLocalizedDescriptionKey : "Could not retrieve image fron url"]))
@@ -247,6 +246,19 @@ class FlickrClient: NSObject {
         }
         
         return (!urlVars.isEmpty ? "?" : "") + urlVars.joinWithSeparator("&")
+    }
+    
+    func getFlickrUrlForPhoto(photoData : [String : AnyObject]) -> NSURL {
+        // https://farm{farm-id}.staticflickr.com/{server-id}/{id}_{secret}_[mstzb].jpg
+        var farm = photoData["farm"] as? String
+        if farm == nil {
+            farm = "1"
+        }
+        let server = photoData["server"] as? String
+        let id = photoData["id"] as? String
+        let secret = photoData["secret"] as? String
+        
+        return NSURL(string: "https://farm\(farm!).staticflickr.com/\(server!)/\(id!)_\(secret!)_m.jpg")!
     }
     
     class func sharedInstance() -> FlickrClient {

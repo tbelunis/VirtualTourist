@@ -82,7 +82,7 @@
                         <rect key="frame" x="0.0" y="0.0" width="600" height="600"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
-                            <mapView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" mapType="standard" translatesAutoresizingMaskIntoConstraints="NO" id="NTh-97-eHd">
+                            <mapView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleToFill" mapType="standard" zoomEnabled="NO" scrollEnabled="NO" rotateEnabled="NO" pitchEnabled="NO" translatesAutoresizingMaskIntoConstraints="NO" id="NTh-97-eHd">
                                 <rect key="frame" x="0.0" y="0.0" width="240" height="128"/>
                                 <constraints>
                                     <constraint firstAttribute="height" constant="112" id="ouK-YC-JLg"/>
@@ -98,8 +98,16 @@
                                     </mask>
                                 </variation>
                             </mapView>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="99e-gZ-1Lk">
+                                <rect key="frame" x="-23" y="-15" width="46" height="30"/>
+                                <state key="normal" title="New Collection"/>
+                                <connections>
+                                    <action selector="newCollectionTouchUp:" destination="g2Y-ci-IcH" eventType="touchUpInside" id="Qih-66-Jie"/>
+                                </connections>
+                            </button>
                             <collectionView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" dataMode="prototypes" translatesAutoresizingMaskIntoConstraints="NO" id="xp8-81-tgY">
                                 <rect key="frame" x="0.0" y="0.0" width="320" height="568"/>
+                                <gestureRecognizers/>
                                 <collectionViewFlowLayout key="collectionViewLayout" minimumLineSpacing="10" minimumInteritemSpacing="10" id="JzP-Cm-Pt0">
                                     <size key="itemSize" width="50" height="50"/>
                                     <size key="headerReferenceSize" width="0.0" height="0.0"/>
@@ -120,17 +128,12 @@
                                 <connections>
                                     <outlet property="dataSource" destination="g2Y-ci-IcH" id="QF3-AB-SC0"/>
                                     <outlet property="delegate" destination="g2Y-ci-IcH" id="rhW-8Y-Ck5"/>
+                                    <outletCollection property="gestureRecognizers" destination="7eG-Ng-Bq6" appends="YES" id="LtA-KY-fei"/>
                                 </connections>
                             </collectionView>
-                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="99e-gZ-1Lk">
-                                <rect key="frame" x="-23" y="-15" width="46" height="30"/>
-                                <state key="normal" title="New Collection"/>
-                                <connections>
-                                    <action selector="newCollectionTouchUp:" destination="g2Y-ci-IcH" eventType="touchUpInside" id="Qih-66-Jie"/>
-                                </connections>
-                            </button>
                         </subviews>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                        <gestureRecognizers/>
                         <constraints>
                             <constraint firstItem="NTh-97-eHd" firstAttribute="top" secondItem="8Zp-7o-8js" secondAttribute="bottom" id="2r7-Nc-Ug5"/>
                             <constraint firstItem="xp8-81-tgY" firstAttribute="centerX" secondItem="99e-gZ-1Lk" secondAttribute="centerX" id="G75-fQ-8tb"/>
@@ -145,8 +148,8 @@
                         <variation key="default">
                             <mask key="subviews">
                                 <exclude reference="NTh-97-eHd"/>
-                                <exclude reference="xp8-81-tgY"/>
                                 <exclude reference="99e-gZ-1Lk"/>
+                                <exclude reference="xp8-81-tgY"/>
                             </mask>
                             <mask key="constraints">
                                 <exclude reference="Kwc-WZ-wOL"/>
@@ -163,8 +166,8 @@
                         <variation key="widthClass=compact">
                             <mask key="subviews">
                                 <include reference="NTh-97-eHd"/>
-                                <include reference="xp8-81-tgY"/>
                                 <include reference="99e-gZ-1Lk"/>
+                                <include reference="xp8-81-tgY"/>
                             </mask>
                             <mask key="constraints">
                                 <include reference="Kwc-WZ-wOL"/>
@@ -178,13 +181,19 @@
                                 <include reference="ozw-jm-O8B"/>
                             </mask>
                         </variation>
+                        <connections>
+                            <outletCollection property="gestureRecognizers" destination="7eG-Ng-Bq6" appends="YES" id="4uY-2y-wmI"/>
+                        </connections>
                     </view>
                     <connections>
                         <outlet property="mapView" destination="NTh-97-eHd" id="bZI-ju-XD7"/>
+                        <outlet property="newCollectionButton" destination="99e-gZ-1Lk" id="dPT-A0-6dp"/>
                         <outlet property="photoCollection" destination="xp8-81-tgY" id="l0P-1e-mw4"/>
+                        <outlet property="tapRecognizer" destination="7eG-Ng-Bq6" id="kZ9-Dp-wkD"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="IX0-Wy-kll" userLabel="First Responder" sceneMemberID="firstResponder"/>
+                <tapGestureRecognizer id="7eG-Ng-Bq6"/>
             </objects>
             <point key="canvasLocation" x="2122.5" y="-390"/>
         </scene>

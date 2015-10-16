@@ -22,6 +22,8 @@ extension FlickrClient {
         static let MaximumLatitude = 90.0
         static let MinimumLongitude = -180.0
         static let MaximumLongitude = 180.0
+        static let LatitudeDelta = 0.01
+        static let LongitudeDelta = 0.01
         static let PerPage = 30
         static let HttpSuccessRange = 200...299
     }
