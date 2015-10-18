@@ -8,6 +8,7 @@
 
 import UIKit
 
+// Custom view for photo collection view
 class PhotoCollectionViewCell: UICollectionViewCell {
     
     @IBOutlet weak var image: UIImageView!

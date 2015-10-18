@@ -13,10 +13,10 @@ import CoreData
 class MapViewController: UIViewController, MKMapViewDelegate {
 
     @IBOutlet weak var mapView: MKMapView!
-    @IBOutlet weak var activityIndicator: UIActivityIndicatorView!
     
     var longPressGestureRecognizer: UILongPressGestureRecognizer?
     
+    // Get the managed object context
     lazy var sharedContext: NSManagedObjectContext = {
         return CoreDataStackManager.sharedInstance().managedObjectContext!
     }()
@@ -25,12 +25,16 @@ class MapViewController: UIViewController, MKMapViewDelegate {
         super.viewDidLoad()
 
         // Do any additional setup after loading the view.
+        
+        // Prepare the map view
         mapView.mapType = .Standard
         mapView.delegate = self
-        let longPressGestureRecognizer = UILongPressGestureRecognizer(target: self, action: "addPinToMap:")
         
+        // Add the long press gesture recognizer to the map view
+        let longPressGestureRecognizer = UILongPressGestureRecognizer(target: self, action: "addPinToMap:")
         mapView.addGestureRecognizer(longPressGestureRecognizer)
-        activityIndicator.hidden = true
+        
+        // Set the initial view of the map
         setInitialMapView()
     }
 
@@ -43,19 +47,21 @@ class MapViewController: UIViewController, MKMapViewDelegate {
 
     // In a storyboard-based application, you will often want to do a little preparation before navigation
     override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
-        // Get the new view controller using segue.destinationViewController.
-        // Pass the selected object to the new view controller.
+        // Set the pin for the PhotoViewController
         let photoController = segue.destinationViewController as! PhotoViewController
         let pin = sender as? Pin
         photoController.pin = pin
     }
 
-
+    // Sets the initial view of the map and adds the pins to the map. The last view of the map is
+    // stored in the user defaults, so the map will always appear as it did the last time the user 
+    // used the app.
     func setInitialMapView() {
         let defaults = NSUserDefaults.standardUserDefaults()
         var mapDefaultsSet: Bool
         mapDefaultsSet = defaults.boolForKey(FlickrClient.NSUserDefaultKeys.StartMapPositionSaved)
        
+        // There are stored values for the view of the map, so use them.
         if mapDefaultsSet {
             let startCenterLatitude = defaults.doubleForKey(FlickrClient.NSUserDefaultKeys.StartMapCenterLatitude)
             let startCenterLongitude = defaults.doubleForKey(FlickrClient.NSUserDefaultKeys.StartMapCenterLongitude)
@@ -69,6 +75,7 @@ class MapViewController: UIViewController, MKMapViewDelegate {
             })
         }
         
+        // Now get all the pins that are stored in CoreData and add them to the map
         let pinFetchRequest = NSFetchRequest(entityName: "Pin")
         do {
             let pins = try sharedContext.executeFetchRequest(pinFetchRequest) as! [Pin]
@@ -76,22 +83,25 @@ class MapViewController: UIViewController, MKMapViewDelegate {
                 self.mapView.addAnnotations(pins)
             })
             
-        } catch let error1 as NSError {
-            print(error1)
+        } catch let error as NSError {
+            print("Error fetching pins from CoreData: \(error)")
         }
     }
     
+    // Add a pin to the map when the user does a long press on the map.
     func addPinToMap(gestureRecogizer: UILongPressGestureRecognizer) {
         if gestureRecogizer.state == UIGestureRecognizerState.Ended {
-            print("Detected long press")
+            // Get the map coordinates from the point where the user pressed
             let coordinate = mapView.convertPoint(gestureRecogizer.locationInView(self.mapView), toCoordinateFromView: self.mapView)
+            // Create a new pin
             let pin = Pin(latitude: coordinate.latitude, longitude: coordinate.longitude, photos: NSSet(), context: sharedContext)
             do {
             try
                 self.sharedContext.save()
-            } catch let error1 as NSError {
-                print(error1)
+            } catch let error  as NSError {
+                print("Error saving new pin: \(error)")
             }
+            // Update the map view with the new pin
             dispatch_async(dispatch_get_main_queue(), {
                 self.mapView.addAnnotation(pin)
             })
@@ -99,6 +109,8 @@ class MapViewController: UIViewController, MKMapViewDelegate {
         
     }
     
+    // Store the map settings in the user defaults when the map region changes so that the last view
+    // of the map can be restored when the user starts the app the next time.
     func mapView(mapView: MKMapView, regionDidChangeAnimated animated: Bool) {
         let centerCoordinate = mapView.centerCoordinate
         let region = mapView.region
@@ -115,6 +127,7 @@ class MapViewController: UIViewController, MKMapViewDelegate {
         defaults.setBool(true, forKey: FlickrClient.NSUserDefaultKeys.StartMapPositionSaved)
     }
     
+    // Get the view for the pin's annotation
     func mapView(mapView: MKMapView, viewForAnnotation annotation: MKAnnotation) -> MKAnnotationView? {
         let reuseIdentifier = "pin"
         var view = mapView.dequeueReusableAnnotationViewWithIdentifier(reuseIdentifier) as? MKPinAnnotationView
@@ -125,8 +138,9 @@ class MapViewController: UIViewController, MKMapViewDelegate {
         return view
     }
     
+    // When the user taps the pin we will segue to the photo collection
     func mapView(mapView: MKMapView, didSelectAnnotationView view: MKAnnotationView) {
-        print(view.annotation?.coordinate)
+        // Fetch the pin from CoreData based on the latitude and longitude of the annotation view.
         let fetchRequest = NSFetchRequest(entityName: "Pin")
     
         let latitudePredicate = NSPredicate(format: "latitude = %@", NSNumber(double: (view.annotation?.coordinate.latitude)!))
@@ -137,29 +151,11 @@ class MapViewController: UIViewController, MKMapViewDelegate {
             let result = try sharedContext.executeFetchRequest(fetchRequest) as! [Pin]
             if result.count > 0 {
                 pin = result.first! as Pin
+                self.mapView.deselectAnnotation(view.annotation, animated: true)
                 self.performSegueWithIdentifier("showPhotos", sender: pin)
             }
         } catch let error as NSError {
-            print(error)
-        }
-    }
-    
-    func startOver() {
-        let fetchRequest = NSFetchRequest(entityName: "Pin")
-        do {
-            let result = try sharedContext.executeFetchRequest(fetchRequest) as! [Pin]
-            if result.count > 0 {
-                for (var i = 0; i < result.count; i++) {
-                    for photo: Photo in result[i].pin_photo.allObjects as! [Photo]
-                    {
-                        sharedContext.deleteObject(photo)
-                    }
-                    
-                    sharedContext.deleteObject(result[i])
-                }
-            }
-        } catch let error as NSError {
-            print(error)
+            print("Error fetching pin for the annotation view: \(error)")
         }
     }
 }

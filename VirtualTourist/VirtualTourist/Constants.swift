@@ -10,7 +10,7 @@ import Foundation
 
 extension FlickrClient {
     struct Constants {
-        static let FlickrApiKey = "d9a1e2ba78c6cdc8b7f4ee9d404fa597"
+        static let FlickrApiKey = "PUT_YOUR_FLICKR_API_KEY_HERE"
         static let FlickrBaseUrl = "https://api.flickr.com/services/rest/"
         static let BoundingBoxHeight = 0.1
         static let BoundingBoxWidth = 0.1
@@ -54,6 +54,7 @@ extension FlickrClient {
         static let Server = "server"
         static let Title = "title"
         static let IsPublic = "ispublic"
+        static let Farm = "farm"
     }
     
     struct NSUserDefaultKeys {

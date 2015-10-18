@@ -20,12 +20,6 @@
                             <mapView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" mapType="standard" translatesAutoresizingMaskIntoConstraints="NO" id="X7g-SY-5fG">
                                 <rect key="frame" x="0.0" y="0.0" width="240" height="128"/>
                             </mapView>
-                            <activityIndicatorView opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" style="gray" translatesAutoresizingMaskIntoConstraints="NO" id="7bJ-5h-ZYR">
-                                <rect key="frame" x="-10" y="-10" width="20" height="20"/>
-                                <variation key="widthClass=compact" fixedFrame="YES">
-                                    <rect key="frame" x="190" y="322" width="20" height="20"/>
-                                </variation>
-                            </activityIndicatorView>
                         </subviews>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="calibratedWhite"/>
                         <constraints>
@@ -37,7 +31,6 @@
                         <variation key="default">
                             <mask key="subviews">
                                 <exclude reference="X7g-SY-5fG"/>
-                                <exclude reference="7bJ-5h-ZYR"/>
                             </mask>
                             <mask key="constraints">
                                 <exclude reference="DXt-83-SYM"/>
@@ -49,7 +42,6 @@
                         <variation key="widthClass=compact">
                             <mask key="subviews">
                                 <include reference="X7g-SY-5fG"/>
-                                <include reference="7bJ-5h-ZYR"/>
                             </mask>
                             <mask key="constraints">
                                 <include reference="DXt-83-SYM"/>
@@ -61,7 +53,6 @@
                     </view>
                     <navigationItem key="navigationItem" id="4S3-ZV-c7g"/>
                     <connections>
-                        <outlet property="activityIndicator" destination="7bJ-5h-ZYR" id="wVX-OJ-6A5"/>
                         <outlet property="mapView" destination="X7g-SY-5fG" id="z0J-RD-rfM"/>
                         <segue destination="g2Y-ci-IcH" kind="show" identifier="showPhotos" id="Qfp-ji-QXj"/>
                     </connections>
@@ -114,6 +105,16 @@
                                     <size key="footerReferenceSize" width="0.0" height="0.0"/>
                                     <inset key="sectionInset" minX="0.0" minY="0.0" maxX="0.0" maxY="0.0"/>
                                 </collectionViewFlowLayout>
+                                <label key="backgroundView" hidden="YES" opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="No Photos" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" id="vIr-57-dpL">
+                                    <rect key="frame" x="-42" y="-21" width="42" height="21"/>
+                                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                    <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                    <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
+                                    <nil key="highlightedColor"/>
+                                    <variation key="widthClass=compact" fixedFrame="YES">
+                                        <rect key="frame" x="0.0" y="0.0" width="400" height="385"/>
+                                    </variation>
+                                </label>
                                 <cells>
                                     <collectionViewCell opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" reuseIdentifier="PhotoCell" id="6U7-cn-Dde" customClass="PhotoCollectionViewCell" customModule="VirtualTourist" customModuleProvider="target">
                                         <rect key="frame" x="0.0" y="0.0" width="50" height="50"/>
@@ -188,6 +189,7 @@
                     <connections>
                         <outlet property="mapView" destination="NTh-97-eHd" id="bZI-ju-XD7"/>
                         <outlet property="newCollectionButton" destination="99e-gZ-1Lk" id="dPT-A0-6dp"/>
+                        <outlet property="noPhotosLabel" destination="vIr-57-dpL" id="1Tw-hX-WZf"/>
                         <outlet property="photoCollection" destination="xp8-81-tgY" id="l0P-1e-mw4"/>
                         <outlet property="tapRecognizer" destination="7eG-Ng-Bq6" id="kZ9-Dp-wkD"/>
                     </connections>

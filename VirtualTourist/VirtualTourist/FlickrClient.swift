@@ -16,9 +16,11 @@ typealias PhotoDataCompletionHandler = (data: NSData?, error: NSError?) -> Void
 
 let documentsDirectory: NSString = NSSearchPathForDirectoriesInDomains(.DocumentDirectory, .UserDomainMask, true)[0]
 
-
+// This class borrows heavily from the Swift 2.0 code from the iOS Networking class FlickrFinder project
 class FlickrClient: NSObject {
     var session: NSURLSession
+    
+    // Static var to keep track of the next page of data to ask Flickr for.
     static var page = 0
     
     override init() {
@@ -30,6 +32,7 @@ class FlickrClient: NSObject {
         return CoreDataStackManager.sharedInstance().managedObjectContext!
         }()
     
+    // Run a task to get the photos associated with the location of a pin.
     func getPhotosForPin(pin: Pin, completionHandler: PhotoCompletionHandler) -> Void {
         
         let methodArguments: [String : AnyObject] = [
@@ -45,6 +48,8 @@ class FlickrClient: NSObject {
         let urlString = Constants.FlickrBaseUrl + escapedParameters(methodArguments)
         let url = NSURL(string: urlString)
         let request = NSURLRequest(URL: url!)
+        var totalPages = 0
+        
         let task = session.dataTaskWithRequest(request) { data, response, error in
             guard (error == nil) else {
                 print("Could not complete the request \(error)")
@@ -86,11 +91,19 @@ class FlickrClient: NSObject {
                 return
             }
             
-            guard let totalPages = photosDictionary["pages"] as? Int else {
-                print("Cannot find key 'pages' in \(parsedResult)")
+            if let pages = photosDictionary["pages"] as? Int {
+                totalPages = pages
+            }
+            
+            // If totalPages == 0, then there are no photos, so call the completion handler
+            // with a result of false
+            if totalPages == 0 {
+                completionHandler(result: false, error: nil)
                 return
             }
             
+            // Increase the page by one so that getting a new collection will retrieve new photos.
+            // If we've gone past the number of available pages, then reset the page to 1.
             if ++FlickrClient.page > totalPages {
                 FlickrClient.page = 1
             }
@@ -98,10 +111,12 @@ class FlickrClient: NSObject {
         
         task.resume()
         
+        // Call the method to get photos from a specific page
         return self.getImageFromFlickrBySearchWithPage(pin, methodArguments: methodArguments, pageNumber: FlickrClient.page, completionHandler: completionHandler)
        
     }
     
+    // Retrieve photos from Flickr for a given page number
     func getImageFromFlickrBySearchWithPage(pin: Pin, methodArguments: [String : AnyObject], pageNumber: Int, completionHandler: PhotoCompletionHandler) -> Void {
         
         var argumentsWithPage = methodArguments
@@ -166,12 +181,24 @@ class FlickrClient: NSObject {
                 
                 let photoSet: NSMutableSet = NSMutableSet()
                 
+                // For each result returned from Flickr, create a photo object and add it to 
+                // the set of photos
                 for photo in photosArray {
                     
+                    // Create a new Photo object
                     let newPhoto = Photo(url: self.getFlickrUrlForPhoto(photo), pin: pin, context: self.sharedContext)
+                    
+                    // Get the image data from the photo's URL and store it in the Documents directory
+                    self.getPhotoFromUrl(newPhoto.url!) { data, error in
+                        guard (error == nil) else {
+                            return
+                        }
+                    }
                     photoSet.addObject(newPhoto)
                 }
                 
+                // If we've added photos to the set, set the pin's photos to the photo set and save
+                // the context.
                 if photoSet.count > 0 {
                     pin.pin_photo = photoSet
                     do {
@@ -188,11 +215,12 @@ class FlickrClient: NSObject {
         
     }
     
+    // Retrieve the photo image data from Flickr using the URL of the photo.
+    // This will run in the background.
     func getPhotoFromUrl(url: NSURL, completionHandler: PhotoDataCompletionHandler) {
         dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0)) {
-            print("Fetching \(url)")
+            // If Flickr returned data, then write it to the Documents directory
             if let imageData = NSData(contentsOfURL:url) {
-//                print("Saving \(url.lastPathComponent!)")
                 let photoPath = documentsDirectory.stringByAppendingPathComponent(url.lastPathComponent!)
                 imageData.writeToFile(photoPath, atomically: true)
                 completionHandler(data: imageData, error: nil)
@@ -202,6 +230,8 @@ class FlickrClient: NSObject {
         }
     }
     
+    
+    // Create the latitude and longitude values for the bbox parameter in the Flickr search request.
     func createBoundingBoxString(pin: Pin) -> String {
         
         let latitude = pin.latitude as Double
@@ -248,15 +278,16 @@ class FlickrClient: NSObject {
         return (!urlVars.isEmpty ? "?" : "") + urlVars.joinWithSeparator("&")
     }
     
+    // Returns the URL for a Flickr photo from the photo data Flickr sent back in the response.
     func getFlickrUrlForPhoto(photoData : [String : AnyObject]) -> NSURL {
-        // https://farm{farm-id}.staticflickr.com/{server-id}/{id}_{secret}_[mstzb].jpg
-        var farm = photoData["farm"] as? String
+        // The URL has the form: https://farm{farm-id}.staticflickr.com/{server-id}/{id}_{secret}_[mstzb].jpg
+        var farm = photoData[JSONResponseKeys.Farm] as? String
         if farm == nil {
             farm = "1"
         }
-        let server = photoData["server"] as? String
-        let id = photoData["id"] as? String
-        let secret = photoData["secret"] as? String
+        let server = photoData[JSONResponseKeys.Server] as? String
+        let id = photoData[JSONResponseKeys.Id] as? String
+        let secret = photoData[JSONResponseKeys.Secret] as? String
         
         return NSURL(string: "https://farm\(farm!).staticflickr.com/\(server!)/\(id!)_\(secret!)_m.jpg")!
     }

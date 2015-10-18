@@ -16,19 +16,17 @@ class PhotoViewController: UIViewController, UICollectionViewDelegate, UICollect
     @IBOutlet weak var mapView: MKMapView!
     @IBOutlet weak var photoCollection: UICollectionView!
     @IBOutlet weak var newCollectionButton: UIButton!
-
+    @IBOutlet weak var noPhotosLabel: UILabel!
+    
     @IBOutlet var tapRecognizer: UITapGestureRecognizer?
+    
+    // When the user taps the New Collection button, delete all the photos for the pin
+    // and download new photos from Flickr.
     @IBAction func newCollectionTouchUp(sender: AnyObject) {
         fetchedResultsController = nil
-        deletePhotosForPin(self.pin)
-        loadPicturesFromFlickr(self.pin)
+        deletePhotosForPin()
+        loadPicturesFromFlickr()
     }
-
-
-    var coordinates: CLLocationCoordinate2D!
-    var photos: [Photo] = [Photo]()
-    var photoUrls: [String] = []
-
     var pin: Pin!
     let reuseIdentifier = "PhotoCell"
 
@@ -38,42 +36,43 @@ class PhotoViewController: UIViewController, UICollectionViewDelegate, UICollect
         return CoreDataStackManager.sharedInstance().managedObjectContext!
         }()
     
-    var fetchRequest = NSFetchRequest(entityName: "Photo")
-    
+
     var fetchedResultsController: NSFetchedResultsController!
     
     override func viewDidLoad() {
         super.viewDidLoad()
-
+        
+        // Display the pin on the small map above the photo collection
         setCenterOfMapToPin()
+        
+        // New Collection button is disabled until the photos have been loaded.
         newCollectionButton.enabled = false
 
         // Do any additional setup after loading the view.
+        
+        // Register the custom cell view and set the delegate and data source for 
+        // the photo collection.
         photoCollection.registerNib(UINib(nibName: "PhotoCollectionCell", bundle: nil), forCellWithReuseIdentifier: "PhotoCell")
         photoCollection.delegate = self
         photoCollection.dataSource   = self
         
+        // Add a tap gesture recognizer to the photoCollection
         let tapRecognizer = UITapGestureRecognizer(target: self, action: "tappedCell:")
         self.photoCollection.addGestureRecognizer(tapRecognizer)
         
-        let sortDescriptor = NSSortDescriptor(key: "id", ascending: true)
-        fetchRequest.sortDescriptors = [sortDescriptor]
-        fetchRequest.predicate = NSPredicate(format: "photo_pin == %@", self.pin)
-        
         fetchedResultsController = getFetchedResultsController()
-        
-        fetchedResultsController.delegate = self
         
         do {
             try fetchedResultsController.performFetch()
-            print("Fetched \(fetchedResultsController.fetchedObjects?.count) photos")
-        } catch let error as NSError {
-            print("Line 60 \(error)")
+            } catch let error as NSError {
+            print("Error fetching photos for pin: \(error)")
         }
         
-
+        // If the fetchedResultsController did not return any objects
+        // then download the photos from Flickr. Otherwise, call reloadData 
+        // to place the photos in the collection view.
         if fetchedResultsController.fetchedObjects?.count == 0 {
-            loadPicturesFromFlickr(self.pin)
+            loadPicturesFromFlickr()
         } else {
             dispatch_async(dispatch_get_main_queue(), {
                 self.photoCollection.reloadData()
@@ -98,6 +97,8 @@ class PhotoViewController: UIViewController, UICollectionViewDelegate, UICollect
         // Dispose of any resources that can be recreated.
     }
 
+    // The number of items for the section is the number of items returned 
+    // from the fetchedResultsController.
     func collectionView(collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         if let count = fetchedResultsController.fetchedObjects?.count {
             return count
@@ -106,27 +107,31 @@ class PhotoViewController: UIViewController, UICollectionViewDelegate, UICollect
         }
     }
 
+    // Return a cell with the photo image
     func collectionView(collectionView: UICollectionView, cellForItemAtIndexPath indexPath: NSIndexPath) -> UICollectionViewCell {
 
         let cell = collectionView.dequeueReusableCellWithReuseIdentifier(reuseIdentifier, forIndexPath: indexPath) as! PhotoCollectionViewCell
         
-//        dispatch_async(dispatch_get_main_queue(), {
-                    cell.activityIndicator.startAnimating()
-            cell.image.image = UIImage(named: "placeholder")
-//        cell.image.image.
+        cell.activityIndicator.hidden = false
+        cell.activityIndicator.startAnimating()
+        
+        // Use a placeholder image until the actual image is loaded.
+        cell.image.image = UIImage(named: "placeholder")
 
-//        })
 
+        // If there are no results returned from the fetch just return the cell
         guard (fetchedResultsController.fetchedObjects?.count != 0) else {
-            print("There are no images")
             return cell
         }
         
+        // Get the photo from the fetchedResultsController for the indexPath
         let p = fetchedResultsController.objectAtIndexPath(indexPath) as! Photo
 
         var imageData: NSData?
-//        print("Photo path = \(p.path)")
-
+        
+        // Check and see if the photo image data has already been stored in the Documents
+        // directory. If it has, then get the image data from the file and set the image 
+        // property of the cell's image view.
         let photoPath = documentsDirectory.stringByAppendingPathComponent(p.path)
         if fileManager.fileExistsAtPath(photoPath) {
             imageData  = NSData(contentsOfFile: photoPath)!
@@ -135,17 +140,21 @@ class PhotoViewController: UIViewController, UICollectionViewDelegate, UICollect
                 cell.activityIndicator.stopAnimating()
             })
         } else {
-            FlickrClient.sharedInstance().getPhotoFromUrl(p.url!) { data, error in
-                if data != nil {
-                    imageData = data
-                    dispatch_async(dispatch_get_main_queue(), {
-                        cell.image.image = UIImage(data: imageData!)
-                        cell.activityIndicator.stopAnimating()
-                    })
-                } else {
-                    print("no image available")
-                    dispatch_async(dispatch_get_main_queue(), {
-                    cell.activityIndicator.stopAnimating()})
+            // The image data is not in the Documents directory, so download it from Flickr.
+            if let photoUrl = p.url {
+                FlickrClient.sharedInstance().getPhotoFromUrl(photoUrl) { data, error in
+                    // If we get data back set the cell's image with a UIImage from the data.
+                    if data != nil {
+                        imageData = data
+                        dispatch_async(dispatch_get_main_queue(), {
+                            cell.image.image = UIImage(data: imageData!)
+                            cell.activityIndicator.stopAnimating()
+                        })
+                    } else {
+                        dispatch_async(dispatch_get_main_queue(), {
+                            cell.activityIndicator.stopAnimating()
+                        })
+                    }
                 }
             }
         }
@@ -154,7 +163,9 @@ class PhotoViewController: UIViewController, UICollectionViewDelegate, UICollect
 
     }
     
+    // When a cell is tapped, delete the photo
     func tappedCell(gestureRecognizer: UITapGestureRecognizer) {
+        // Map the point the user tapped to a cell in the photo collection view
         let tappedPoint: CGPoint = gestureRecognizer.locationInView(photoCollection)
         if let tappedCellPath: NSIndexPath = photoCollection.indexPathForItemAtPoint(tappedPoint) {
             let photo = fetchedResultsController.objectAtIndexPath(tappedCellPath) as! Photo
@@ -162,18 +173,31 @@ class PhotoViewController: UIViewController, UICollectionViewDelegate, UICollect
             do {
                 try sharedContext.save()
             } catch let error as NSError {
-                print(error)
+                print("Error deleting photo: \(error)")
             }
         }
     }
 
+    // Returns a fetchedResultController for fetching photos associated with a pin
     func getFetchedResultsController() -> NSFetchedResultsController {
-        return NSFetchedResultsController(fetchRequest: fetchRequest, managedObjectContext: sharedContext, sectionNameKeyPath: nil, cacheName: nil)
+        // Fetch photo objects
+        let fetchRequest = NSFetchRequest(entityName: "Photo")
+        
+        // Sorted by id
+        let sortDescriptor = NSSortDescriptor(key: "id", ascending: true)
+        fetchRequest.sortDescriptors = [sortDescriptor]
+        
+        // Where the photo is assocaited with the pin
+        fetchRequest.predicate = NSPredicate(format: "photo_pin == %@", self.pin)
+        fetchedResultsController = NSFetchedResultsController(fetchRequest: fetchRequest, managedObjectContext: sharedContext, sectionNameKeyPath: nil, cacheName: nil)
+        fetchedResultsController.delegate = self
+        return fetchedResultsController
     }
     
-    func deletePhotosForPin(aPin: Pin) {
-        if aPin.pin_photo.count > 0 {
-            for photo in aPin.pin_photo {
+    // Delete all the photos associated with the pin
+    func deletePhotosForPin() {
+        if pin.pin_photo.count > 0 {
+            for photo in pin.pin_photo {
                 sharedContext.deleteObject(photo as! Photo)
             }
             do {
@@ -184,18 +208,25 @@ class PhotoViewController: UIViewController, UICollectionViewDelegate, UICollect
         }
     }
     
-    func loadPicturesFromFlickr(aPin: Pin) {
+    // Call the Flickr client to retrieve photos based on the location
+    // of the pin.
+    func loadPicturesFromFlickr() {
         newCollectionButton.enabled = false
+        dispatch_async(dispatch_get_main_queue(), {
+            self.noPhotosLabel.hidden = true
+        })
         fetchedResultsController = getFetchedResultsController()
         
-        FlickrClient.sharedInstance().getPhotosForPin(aPin) { hasPhotos, error in
+        FlickrClient.sharedInstance().getPhotosForPin(pin) { hasPhotos, error in
             guard (error == nil) else {
-                print("getPhotosForPin returned \(error)")
+                print("getPhotosForPin returned an error: \(error)")
                 return
             }
             
             if hasPhotos {
                 do {
+                    // Fetch the photos from CoreData and display them in the
+                    // collection view.
                     try self.fetchedResultsController.performFetch()
                     dispatch_async(dispatch_get_main_queue(), {
                         self.photoCollection.reloadData()
@@ -203,14 +234,20 @@ class PhotoViewController: UIViewController, UICollectionViewDelegate, UICollect
                     })
                     
                 } catch let error as NSError {
-                    print("Line 76 \(error)")
+                    print("Error fetching photos for pin: \(error)")
                 }
             } else {
-                print("No photos")
+                // No photos were found for the location specified by the
+                // pin, so display the "No Photos" label
+                dispatch_async(dispatch_get_main_queue(), {
+                    self.noPhotosLabel.hidden = false
+                })
+                
             }
         }
     }
 
+    /*
     // MARK: - Navigation
 
     // In a storyboard-based application, you will often want to do a little preparation before navigation
@@ -219,8 +256,9 @@ class PhotoViewController: UIViewController, UICollectionViewDelegate, UICollect
         // Pass the selected object to the new view controller.
 
     }
-
+    */
     
+    // Sets the view for the small map above the photos to center the pin in the map view.
     func setCenterOfMapToPin() {
         let location = CLLocationCoordinate2DMake(pin.latitude as Double, pin.longitude as Double)
         let span = MKCoordinateSpanMake(FlickrClient.Constants.LatitudeDelta, FlickrClient.Constants.LongitudeDelta)
@@ -233,6 +271,7 @@ class PhotoViewController: UIViewController, UICollectionViewDelegate, UICollect
 
 }
 
+// Methods to lay out the cells in the collection view.
 extension PhotoViewController: UICollectionViewDelegateFlowLayout {
     func collectionView(collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAtIndexPath indexPath: NSIndexPath) -> CGSize {
         let picDimension = self.view.frame.size.width / 4.0
@@ -245,17 +284,10 @@ extension PhotoViewController: UICollectionViewDelegateFlowLayout {
     }
 }
 
+
 extension PhotoViewController: NSFetchedResultsControllerDelegate {
-    func controllerDidChangeContent(controller: NSFetchedResultsController) {
-        dispatch_async(dispatch_get_main_queue(), {
-            self.photoCollection.reloadData()
-        })
-    }
-    
-    func controllerWillChangeContent(controller: NSFetchedResultsController) {
-        
-    }
-    
+
+    // When a photo is deleted, the fetchedResultsController has the photoCollection reload data
     func controller(controller: NSFetchedResultsController, didChangeObject anObject: AnyObject, atIndexPath indexPath: NSIndexPath?, forChangeType type: NSFetchedResultsChangeType, newIndexPath: NSIndexPath?) {
         switch type {
         case .Insert:
