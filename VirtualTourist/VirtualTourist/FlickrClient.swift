@@ -184,30 +184,20 @@ class FlickrClient: NSObject {
                 // For each result returned from Flickr, create a photo object and add it to 
                 // the set of photos
                 for photo in photosArray {
+                    self.sharedContext.performBlockAndWait({
+                        // Create a new Photo object
+                        let newPhoto = Photo(url: self.getFlickrUrlForPhoto(photo), pin: pin, context: self.sharedContext)
                     
-                    // Create a new Photo object
-                    let newPhoto = Photo(url: self.getFlickrUrlForPhoto(photo), pin: pin, context: self.sharedContext)
-                    
-                    // Get the image data from the photo's URL and store it in the Documents directory
-                    self.getPhotoFromUrl(newPhoto.url!) { data, error in
-                        guard (error == nil) else {
-                            return
+                        // Get the image data from the photo's URL and store it in the Documents directory
+                        self.getPhotoFromUrl(newPhoto.url!) { data, error in
+                            guard (error == nil) else {
+                                return
+                            }
                         }
-                    }
-                    photoSet.addObject(newPhoto)
+                        photoSet.addObject(newPhoto)
+                    })
                 }
                 
-                // If we've added photos to the set, set the pin's photos to the photo set and save
-                // the context.
-                if photoSet.count > 0 {
-                    pin.pin_photo = photoSet
-                    do {
-                        try self.sharedContext.save()
-                    } catch let error2 as NSError {
-                        print("Error saving context for pin photos \(error2)")
-                    }
-                    
-                }
                 completionHandler(result: true, error: nil)
             }
         }
